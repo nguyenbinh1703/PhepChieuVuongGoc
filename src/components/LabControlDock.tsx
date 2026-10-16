@@ -532,26 +532,9 @@ export const LabControlDock: React.FC<Props> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenu, setOpenMenu] = useState<'2d' | '3d' | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastSnapAngleRef = useRef<number | null>(null);
 
   const handleAngleChange = (newAngle: number) => {
     onUpdateLaser({ alpha: newAngle });
-
-    // Khấc rung phản hồi xúc giác (Haptic) & âm thanh cơ học tinh tế khi chạm mốc góc chuẩn
-    const SNAP_ANGLES = [30, 45, 60, 90, 120, 135, 150];
-    if (SNAP_ANGLES.includes(newAngle)) {
-      if (lastSnapAngleRef.current !== newAngle) {
-        lastSnapAngleRef.current = newAngle;
-        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-          try {
-            navigator.vibrate(8);
-          } catch (_) {}
-        }
-        labAudio.playClick();
-      }
-    } else {
-      lastSnapAngleRef.current = null;
-    }
   };
 
   // Lắng nghe sự kiện click ra ngoài khi bảng đang mở để tự động ẩn bảng điều khiển
@@ -642,7 +625,7 @@ export const LabControlDock: React.FC<Props> = ({
       ref={containerRef}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
-      className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center pointer-events-auto overflow-visible select-none w-[calc(100vw-1.25rem)] max-w-fit lg:w-auto"
+      className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center pointer-events-auto overflow-visible select-none w-[calc(100vw-1.25rem)] max-w-lg sm:max-w-xl"
     >
       {/* Nút Ẩn bảng điều khiển tinh tế trên mép dock */}
       <button
@@ -658,89 +641,25 @@ export const LabControlDock: React.FC<Props> = ({
         <span>Ẩn bảng điều khiển</span>
       </button>
 
-      {/* Main Control Dock: Co giãn thông minh trên điện thoại / máy tính bảng và trải dài ngang chuẩn mực trên màn hình lớn */}
-      <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 shadow-2xl rounded-2xl p-2 sm:p-2.5 transition-all relative overflow-visible w-full lg:w-auto">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 lg:gap-2.5 py-0.5 overflow-visible">
-          {/* Nhóm 1: Nguồn Laser + Góc chiếu + Độ sáng đèn */}
-          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 overflow-visible">
-            {/* Nút Ẩn/Hiện Đèn pin (Icon tròn hiện đại, tinh tế) */}
-            <LabTooltip shortcut="(L)" position="top">
-              <button
-                type="button"
-                onClick={handleToggleLampVisibility}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-2xs border ${
-                  isLampVisible
-                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-600 border-sky-200 ring-2 ring-sky-100/80 hover:scale-105 active:scale-95'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border-slate-300/80 hover:scale-105 active:scale-95'
-                }`}
-              >
-                {isLampVisible ? (
-                  <Flashlight className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sky-600" />
-                ) : (
-                  <FlashlightOff className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-400" />
-                )}
-              </button>
-            </LabTooltip>
-
-            {/* Nút Ẩn/Hiện Khung Hình Hộp chứa vật mẫu (Icon tròn hiện đại, tinh tế) */}
-            <LabTooltip shortcut="(B)" position="top">
-              <button
-                type="button"
-                onClick={() => {
-                  if (onToggleBox) {
-                    onToggleBox();
-                  }
-                }}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-2xs border ${
-                  isBoxVisible
-                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-600 border-sky-200 ring-2 ring-sky-100/80 hover:scale-105 active:scale-95'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border-slate-300/80 hover:scale-105 active:scale-95'
-                }`}
-              >
-                {isBoxVisible ? (
-                  <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sky-600" />
-                ) : (
-                  <div className="relative flex items-center justify-center">
-                    <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-400" />
-                    <div className="absolute w-5 h-0.5 bg-slate-400 rotate-45 rounded-full" />
-                  </div>
-                )}
-              </button>
-            </LabTooltip>
-
-            {/* Ô 1: Nguồn Laser (Kích thước co giãn linh hoạt, tự động vô hiệu hóa và làm mờ khi đèn pin bị ẩn) */}
-            <LabTooltip shortcut="(Space)" position="top">
-              <button
-                type="button"
-                disabled={!isLampVisible}
-                onClick={handleTogglePower}
-                className={`w-13 sm:w-16 lg:w-[72px] h-9 sm:h-10 flex items-center justify-center gap-1 sm:gap-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 ${
-                  !isLampVisible
-                    ? 'bg-slate-200/90 text-slate-400 border border-slate-300/60 opacity-40 cursor-not-allowed pointer-events-none'
-                    : laser.isOn
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white ring-2 ring-rose-200 cursor-pointer active:scale-95'
-                    : 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer active:scale-95'
-                }`}
-              >
-                <Power className="w-3.5 h-3.5 shrink-0" />
-                <span className="tracking-wide text-[10px] sm:text-xs">{laser.isOn ? 'BẬT' : 'TẮT'}</span>
-              </button>
-            </LabTooltip>
-
-            {/* Ô 2: Góc chiếu (Tự co giãn trên điện thoại, cố định trên màn hình rộng) */}
-            <LabTooltip shortcut="(←|→)" position="top" className="flex-1 sm:w-44 lg:w-44">
-              <div className="w-full h-10 flex flex-col justify-center gap-1 shrink-0 bg-slate-50/80 px-2 sm:px-2.5 py-1.5 rounded-xl border border-slate-200/70 min-w-0">
+      {/* Main Control Dock: Bố cục 2 tầng chuẩn mực, tối ưu hoàn hảo cho cả điện thoại & máy tính */}
+      <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 shadow-2xl rounded-2xl p-2 sm:p-2.5 transition-all relative overflow-visible w-full">
+        <div className="flex flex-col gap-2 w-full overflow-visible">
+          {/* TẦNG 1: Góc chiếu (70%) và Độ sáng đèn (30%) */}
+          <div className="flex items-center gap-2 w-full">
+            {/* Ô 1: Góc chiếu (Chiếm 70% chiều rộng) */}
+            <LabTooltip shortcut="(←|→)" position="top" className="flex-[7] min-w-0">
+              <div className="w-full h-11 flex flex-col justify-center gap-1 bg-slate-50/90 px-2.5 sm:px-3 py-1 rounded-xl border border-slate-200/80 min-w-0 shadow-2xs">
                 <div className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 flex items-center gap-1 truncate">
-                    <Compass className="w-3 h-3 text-sky-600 shrink-0" />
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-700 flex items-center gap-1 truncate">
+                    <Compass className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                     <span className="truncate">Góc chiếu</span>
                   </span>
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-100 text-sky-800 leading-tight shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold w-11 text-center py-0.5 rounded bg-sky-100 text-sky-800 tabular-nums shrink-0 leading-none">
                     {Math.round(laser.alpha)}°
                   </span>
                 </div>
 
-                {/* Thanh trượt góc chiếu trơn tru với bước nhảy 1 độ (30, 31, 32...) */}
+                {/* Thanh trượt góc chiếu mượt mà, không giật lag, cố định vị trí */}
                 <input
                   type="range"
                   min="30"
@@ -757,20 +676,21 @@ export const LabControlDock: React.FC<Props> = ({
                       (e.target as HTMLElement).blur();
                     }
                   }}
-                  className="w-full accent-sky-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg"
+                  className="w-full accent-sky-600 cursor-pointer h-2 bg-slate-200 rounded-lg touch-none"
+                  style={{ touchAction: 'none' }}
                 />
               </div>
             </LabTooltip>
 
-            {/* Ô 3: Độ sáng đèn (Tự co giãn trên điện thoại, cố định trên màn hình rộng) */}
-            <LabTooltip shortcut="(↑|↓)" position="top" className="flex-1 sm:w-40 lg:w-40">
-              <div className="w-full h-10 flex flex-col justify-center gap-1 shrink-0 bg-slate-50/80 px-2 sm:px-2.5 py-1.5 rounded-xl border border-slate-200/70 min-w-0">
+            {/* Ô 2: Độ sáng đèn (Chiếm 30% chiều rộng) */}
+            <LabTooltip shortcut="(↑|↓)" position="top" className="flex-[3] min-w-0">
+              <div className="w-full h-11 flex flex-col justify-center gap-1 bg-slate-50/90 px-2 sm:px-2.5 py-1 rounded-xl border border-slate-200/80 min-w-0 shadow-2xs">
                 <div className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 flex items-center gap-1 truncate">
-                    <Sun className="w-3 h-3 text-amber-500 shrink-0" />
-                    <span className="truncate">Độ sáng đèn</span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-700 flex items-center gap-1 truncate">
+                    <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="truncate">Độ sáng</span>
                   </span>
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded leading-tight shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold w-11 text-center py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/60 tabular-nums shrink-0 leading-none">
                     {(laser.intensity * 100).toFixed(0)}%
                   </span>
                 </div>
@@ -793,16 +713,83 @@ export const LabControlDock: React.FC<Props> = ({
                       (e.target as HTMLElement).blur();
                     }
                   }}
-                  className="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-200 rounded-lg"
+                  className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-200 rounded-lg touch-none"
+                  style={{ touchAction: 'none' }}
                 />
               </div>
             </LabTooltip>
           </div>
 
-          {/* Nhóm 2: Dropdowns Hình 2D & Hình 3D */}
-          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 overflow-visible">
-            {/* Ô 4: Dropdown Hình 2D */}
-            <div className={`relative flex-1 lg:flex-initial lg:w-36 shrink-0 overflow-visible ${openMenu === '2d' ? 'z-50' : 'z-20'}`}>
+          {/* TẦNG 2: Đèn, Hộp, Bật/tắt, Hình 2D, Hình 3D */}
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full overflow-visible">
+            {/* Nút 1: Ẩn/Hiện Đèn pin */}
+            <LabTooltip shortcut="(L)" position="top">
+              <button
+                type="button"
+                onClick={handleToggleLampVisibility}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-2xs border ${
+                  isLampVisible
+                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-600 border-sky-200 ring-2 ring-sky-100/80 active:scale-95'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border-slate-300/80 active:scale-95'
+                }`}
+                title={isLampVisible ? 'Ẩn đèn pin' : 'Hiện đèn pin'}
+              >
+                {isLampVisible ? (
+                  <Flashlight className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sky-600" />
+                ) : (
+                  <FlashlightOff className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-400" />
+                )}
+              </button>
+            </LabTooltip>
+
+            {/* Nút 2: Ẩn/Hiện Khung hình hộp chứa vật mẫu */}
+            <LabTooltip shortcut="(B)" position="top">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onToggleBox) {
+                    onToggleBox();
+                  }
+                }}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-2xs border ${
+                  isBoxVisible
+                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-600 border-sky-200 ring-2 ring-sky-100/80 active:scale-95'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border-slate-300/80 active:scale-95'
+                }`}
+                title={isBoxVisible ? 'Ẩn khung hộp' : 'Hiện khung hộp'}
+              >
+                {isBoxVisible ? (
+                  <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sky-600" />
+                ) : (
+                  <div className="relative flex items-center justify-center">
+                    <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-400" />
+                    <div className="absolute w-5 h-0.5 bg-slate-400 rotate-45 rounded-full" />
+                  </div>
+                )}
+              </button>
+            </LabTooltip>
+
+            {/* Nút 3: Nguồn Laser (Bật/Tắt) */}
+            <LabTooltip shortcut="(Space)" position="top">
+              <button
+                type="button"
+                disabled={!isLampVisible}
+                onClick={handleTogglePower}
+                className={`w-13 sm:w-16 h-9 sm:h-10 flex items-center justify-center gap-1 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 ${
+                  !isLampVisible
+                    ? 'bg-slate-200/90 text-slate-400 border border-slate-300/60 opacity-40 cursor-not-allowed pointer-events-none'
+                    : laser.isOn
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white ring-2 ring-rose-200 cursor-pointer active:scale-95'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer active:scale-95'
+                }`}
+              >
+                <Power className="w-3.5 h-3.5 shrink-0" />
+                <span className="tracking-wide text-[10px] sm:text-xs">{laser.isOn ? 'BẬT' : 'TẮT'}</span>
+              </button>
+            </LabTooltip>
+
+            {/* Nút 4: Dropdown Hình 2D (Thu gọn gọn gàng, có ... khi dài, danh sách mở ra đọc rõ nét) */}
+            <div className={`relative flex-1 min-w-0 overflow-visible ${openMenu === '2d' ? 'z-50' : 'z-20'}`}>
               <button
                 type="button"
                 onClick={(e) => {
@@ -810,23 +797,23 @@ export const LabControlDock: React.FC<Props> = ({
                   labAudio.playClick();
                   setOpenMenu((prev) => (prev === '2d' ? null : '2d'));
                 }}
-                className={`w-full lg:w-36 h-10 shrink-0 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                className={`w-full h-9 sm:h-10 flex items-center justify-between px-2 sm:px-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                   is2DSelected || openMenu === '2d'
                     ? 'bg-sky-50 text-sky-900 border-sky-300 ring-2 ring-sky-100 shadow-xs'
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 overflow-hidden">
                   <Shapes
                     className={`w-3.5 h-3.5 shrink-0 ${
                       is2DSelected || openMenu === '2d' ? 'text-sky-600' : 'text-slate-400'
                     }`}
                   />
                   <div className="flex flex-col text-left leading-tight min-w-0 overflow-hidden">
-                    <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">
-                      Hình 2D
+                    <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none">
+                      2D
                     </span>
-                    <span className="font-bold text-slate-800 text-[11px] truncate max-w-[80px] sm:max-w-[78px] block">
+                    <span className="font-bold text-slate-800 text-[11px] truncate block leading-tight">
                       {is2DSelected ? current2D?.label : 'Chọn hình'}
                     </span>
                   </div>
@@ -838,19 +825,19 @@ export const LabControlDock: React.FC<Props> = ({
                 />
               </button>
 
-              {/* Popover Menu Xổ Lên (Hình 2D - Hiển thị sắc nét, không bị che khuất) */}
+              {/* Popover Menu Xổ Lên (Hình 2D - Đầy đủ, sắc nét, đọc trọn vẹn danh sách) */}
               {openMenu === '2d' && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute bottom-full mb-2 sm:mb-3 left-0 lg:left-auto lg:right-0 w-60 max-w-[calc(100vw-2.5rem)] bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 pointer-events-auto"
+                  className="absolute bottom-full mb-2 sm:mb-3 left-0 sm:left-auto sm:right-0 w-56 sm:w-64 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 pointer-events-auto"
                   style={{ minWidth: '220px' }}
                 >
                   <div className="px-3 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
                     <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                      Hình 2D
+                      Danh sách Hình 2D
                     </span>
                   </div>
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0.5 max-h-60 overflow-y-auto">
                     {SPECIMENS_2D.map((item) => {
                       const active = selectedSpecimen === item.id;
                       return (
@@ -884,8 +871,8 @@ export const LabControlDock: React.FC<Props> = ({
               )}
             </div>
 
-            {/* Ô 5: Dropdown Hình 3D (Kích thước tự co giãn linh hoạt) */}
-            <div className={`relative flex-1 lg:flex-initial lg:w-38 shrink-0 overflow-visible ${openMenu === '3d' ? 'z-50' : 'z-20'}`}>
+            {/* Nút 5: Dropdown Hình 3D (Thu gọn gọn gàng, có ... khi dài, danh sách mở ra đọc rõ nét) */}
+            <div className={`relative flex-1 min-w-0 overflow-visible ${openMenu === '3d' ? 'z-50' : 'z-20'}`}>
               <button
                 type="button"
                 onClick={(e) => {
@@ -893,23 +880,23 @@ export const LabControlDock: React.FC<Props> = ({
                   labAudio.playClick();
                   setOpenMenu((prev) => (prev === '3d' ? null : '3d'));
                 }}
-                className={`w-full lg:w-38 h-10 shrink-0 flex items-center justify-between px-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                className={`w-full h-9 sm:h-10 flex items-center justify-between px-2 sm:px-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                   is3DSelected || openMenu === '3d'
                     ? 'bg-indigo-50 text-indigo-900 border-indigo-300 ring-2 ring-indigo-100 shadow-xs'
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 overflow-hidden">
                   <Box
                     className={`w-3.5 h-3.5 shrink-0 ${
                       is3DSelected || openMenu === '3d' ? 'text-indigo-600' : 'text-slate-400'
                     }`}
                   />
                   <div className="flex flex-col text-left leading-tight min-w-0 overflow-hidden">
-                    <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">
-                      Hình 3D
+                    <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none">
+                      3D
                     </span>
-                    <span className="font-bold text-slate-800 text-[11px] truncate max-w-[85px] block">
+                    <span className="font-bold text-slate-800 text-[11px] truncate block leading-tight">
                       {is3DSelected ? current3D?.label : 'Chọn khối'}
                     </span>
                   </div>
@@ -921,19 +908,19 @@ export const LabControlDock: React.FC<Props> = ({
                 />
               </button>
 
-              {/* Popover Menu Xổ Lên (Hình 3D - Hiển thị sắc nét, không bị che khuất) */}
+              {/* Popover Menu Xổ Lên (Hình 3D - Đầy đủ, sắc nét, đọc trọn vẹn danh sách) */}
               {openMenu === '3d' && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute bottom-full mb-2 sm:mb-3 right-0 w-60 max-w-[calc(100vw-2.5rem)] bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 pointer-events-auto"
+                  className="absolute bottom-full mb-2 sm:mb-3 right-0 w-56 sm:w-64 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 pointer-events-auto"
                   style={{ minWidth: '220px' }}
                 >
                   <div className="px-3 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
                     <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                      Hình 3D
+                      Danh sách Khối 3D
                     </span>
                   </div>
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0.5 max-h-60 overflow-y-auto">
                     {SPECIMENS_3D.map((item) => {
                       const active = selectedSpecimen === item.id;
                       return (

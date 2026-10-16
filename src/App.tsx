@@ -165,8 +165,6 @@ export default function App() {
         return;
       }
 
-      const SNAP_ANGLES = [30, 45, 60, 90, 120, 135, 150];
-
       switch (e.code) {
         case 'Space': {
           e.preventDefault();
@@ -184,14 +182,6 @@ export default function App() {
           setLaser((prev) => {
             const currentA = Math.round(prev.alpha);
             const newAlpha = Math.max(30, currentA - step);
-            if (newAlpha !== currentA && SNAP_ANGLES.includes(newAlpha)) {
-              if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                try {
-                  navigator.vibrate(8);
-                } catch (_) {}
-              }
-              labAudio.playClick();
-            }
             return { ...prev, alpha: newAlpha };
           });
           break;
@@ -202,14 +192,6 @@ export default function App() {
           setLaser((prev) => {
             const currentA = Math.round(prev.alpha);
             const newAlpha = Math.min(150, currentA + step);
-            if (newAlpha !== currentA && SNAP_ANGLES.includes(newAlpha)) {
-              if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                try {
-                  navigator.vibrate(8);
-                } catch (_) {}
-              }
-              labAudio.playClick();
-            }
             return { ...prev, alpha: newAlpha };
           });
           break;

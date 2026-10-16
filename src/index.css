@@ -29,6 +29,12 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Tối ưu phản hồi cảm ứng cho thanh trượt trên điện thoại */
+  input[type="range"] {
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
