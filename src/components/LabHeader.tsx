@@ -148,7 +148,7 @@ export const LabHeader: React.FC<Props> = ({
       {/* 1. Left: Tiêu đề mô hình thí nghiệm căn giữa theo chiều dọc với logo */}
       <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-transparent flex items-center justify-center text-white shadow-xs shrink-0">
-          <img src="/favicon.ico" alt="Logo" className="w-5 h-5 object-contain" />
+          <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
         </div>
         <h1 className="text-xs sm:text-sm font-bold tracking-tight text-slate-900 whitespace-nowrap leading-none">
           MÔ HÌNH THÍ NGHIỆM
