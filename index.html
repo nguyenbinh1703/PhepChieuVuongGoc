@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="apple-touch-icon" href="./logo.png" />
     <script>
       (function() {
         try {
@@ -18,12 +18,73 @@
             enumerable: true
           });
         } catch (e) {}
+
+        // --- Hệ thống Bảo Mật Chống Sao Chép, Chống Tải Xuống & Chống Mở DevTools ---
+        // 1. Chặn menu ngữ cảnh chuột phải trên toàn trang
+        document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+        }, { capture: true });
+
+        // 2. Chặn kéo thả hình ảnh và tài nguyên trang web
+        document.addEventListener('dragstart', function(e) {
+          e.preventDefault();
+          return false;
+        }, { capture: true });
+
+        // 3. Chặn bôi đen và lựa chọn văn bản
+        document.addEventListener('selectstart', function(e) {
+          e.preventDefault();
+          return false;
+        }, { capture: true });
+
+        // 4. Chặn các phím tắt nguy hiểm: F12, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+Shift+I/J/C/S, Ctrl+A
+        window.addEventListener('keydown', function(e) {
+          var k = (e.key || '').toLowerCase();
+          var c = e.code || '';
+          var isCtrl = e.ctrlKey || e.metaKey;
+
+          // Chặn phím F12 (DevTools)
+          if (e.keyCode === 123 || k === 'f12' || c === 'F12') {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+
+          if (isCtrl) {
+            // Chặn Ctrl+U (Xem nguồn trang web)
+            // Chặn Ctrl+S / Ctrl+Shift+S (Lưu trang web / Tải về máy)
+            // Chặn Ctrl+P (In ấn / Xuất file PDF)
+            // Chặn Ctrl+A (Bôi đen toàn trang)
+            // Chặn Ctrl+Shift+I / J / C (Kiểm tra phần tử / Console)
+            if (
+              k === 'u' || c === 'KeyU' ||
+              k === 's' || c === 'KeyS' ||
+              k === 'p' || c === 'KeyP' ||
+              k === 'a' || c === 'KeyA' ||
+              (e.shiftKey && (k === 'i' || k === 'j' || k === 'c' || c === 'KeyI' || c === 'KeyJ' || c === 'KeyC' || c === 'KeyS'))
+            ) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          }
+
+          // Chặn phím tắt cho MacOS: Cmd+Option+I, Cmd+Option+J, Cmd+Option+C, Cmd+Option+U
+          if (e.metaKey && e.altKey) {
+            if (k === 'i' || k === 'j' || k === 'c' || k === 'u' || c === 'KeyI' || c === 'KeyJ' || c === 'KeyC' || c === 'KeyU') {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          }
+        }, { capture: true });
       })();
     </script>
     <title>Mô Hình Thí Nghiệm</title>
     <meta name="description" content="Mô hình thí nghiệm phép chiếu song song và phép chiếu vuông góc." />
     <meta property="og:title" content="Mô Hình Thí Nghiệm" />
-    <meta property="og:description" content="Mô phỏng 3D buồng kính thí nghiệm quang học thực hành phép chiếu song song và phép chiếu vuông góc với nguồn sáng laser tự do điều chỉnh góc và độ cao." />
+    <meta property="og:description" content="Mô phỏng thí nghiệm quang học phép chiếu song song và phép chiếu vuông góc với nguồn sáng laser" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">

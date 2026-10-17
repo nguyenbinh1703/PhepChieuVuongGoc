@@ -107,23 +107,33 @@ export default function App() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Tự động đồng bộ hóa trạng thái thí nghiệm vào URL Hash (Lưu trữ & Chia sẻ bài học tức thì)
+  // Tự động đồng bộ hóa trạng thái thí nghiệm vào URL Hash với Debounce 600ms
+  // Chống nghẽn IPC, chống giật lag và chống lỗi bảo mật WebKit trên iPhone (SecurityError: Attempt to use history.replaceState() more than 100 times per 30 seconds)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams();
-    params.set('alpha', Math.round(laser.alpha).toString());
-    params.set('specimen', selectedSpecimen);
-    if (!isBoxVisible) params.set('box', '0');
-    if (laser.isVisible === false) params.set('lamp', '0');
-    if (!laser.isOn) params.set('power', '0');
-    if (laser.intensity < 0.99) params.set('intensity', (Math.round(laser.intensity * 100) / 100).toString());
-    if (cameraPreset !== 'isometric') params.set('cam', cameraPreset);
-    if (interactionMode !== 'orbit') params.set('mode', interactionMode);
 
-    const hashStr = '#' + params.toString();
-    if (window.location.hash !== hashStr) {
-      window.history.replaceState(null, '', hashStr);
-    }
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const params = new URLSearchParams();
+        params.set('alpha', Math.round(laser.alpha).toString());
+        params.set('specimen', selectedSpecimen);
+        if (!isBoxVisible) params.set('box', '0');
+        if (laser.isVisible === false) params.set('lamp', '0');
+        if (!laser.isOn) params.set('power', '0');
+        if (laser.intensity < 0.99) params.set('intensity', (Math.round(laser.intensity * 100) / 100).toString());
+        if (cameraPreset !== 'isometric') params.set('cam', cameraPreset);
+        if (interactionMode !== 'orbit') params.set('mode', interactionMode);
+
+        const hashStr = '#' + params.toString();
+        if (window.location.hash !== hashStr) {
+          window.history.replaceState(null, '', hashStr);
+        }
+      } catch (_) {
+        // Nuốt lỗi an toàn nếu WebKit hoặc trình duyệt chặn replaceState
+      }
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
   }, [laser, selectedSpecimen, isBoxVisible, cameraPreset, interactionMode]);
 
   const handleUpdateLaser = (partial: Partial<LaserConfig>) => {
@@ -148,6 +158,41 @@ export default function App() {
   // Hệ thống Phím tắt Bàn phím Công thái học (Keyboard Shortcuts cho Giảng dạy & Thực hành)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 1. Khóa phím F12 (DevTools / Console)
+      const k = (e.key || '').toLowerCase();
+      const c = e.code || '';
+      const isCtrl = e.ctrlKey || e.metaKey;
+
+      if (e.keyCode === 123 || k === 'f12' || c === 'F12') {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // 2. Khóa các tổ hợp phím xem nguồn, tải trang web, in ấn, hoặc mở công cụ kiểm tra
+      if (isCtrl) {
+        if (
+          k === 'u' || c === 'KeyU' || // Xem mã nguồn (View Source)
+          k === 's' || c === 'KeyS' || // Tải / Lưu trang web về máy (Save Page)
+          k === 'p' || c === 'KeyP' || // In ấn / Xuất file PDF (Print Page)
+          k === 'a' || c === 'KeyA' || // Bôi đen toàn trang (Select All)
+          (e.shiftKey && (k === 'i' || k === 'j' || k === 'c' || c === 'KeyI' || c === 'KeyJ' || c === 'KeyC' || c === 'KeyS'))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+
+      // 3. Khóa phím tắt MacOS: Cmd + Option + I/J/C/U
+      if (e.metaKey && e.altKey) {
+        if (k === 'i' || k === 'j' || k === 'c' || k === 'u' || c === 'KeyI' || c === 'KeyJ' || c === 'KeyC' || c === 'KeyU') {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+
       // Bắt phím F11 ngay cả khi không có modifier để đồng bộ với HTML5 Fullscreen API
       if (e.key === 'F11' || e.code === 'F11') {
         e.preventDefault();
@@ -319,6 +364,27 @@ export default function App() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [laser.isOn, laser.isVisible, laser.intensity]);
+
+  // Hệ thống Bảo Mật Lớp 2: Chặn menu ngữ cảnh chuột phải và kéo thả tài nguyên
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleDragStart = (e: DragEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu, { capture: true });
+    document.addEventListener('dragstart', handleDragStart, { capture: true });
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu, { capture: true });
+      document.removeEventListener('dragstart', handleDragStart, { capture: true });
+    };
+  }, []);
 
   return (
     <div className="relative w-screen h-screen h-[100dvh] overflow-hidden bg-slate-100 flex flex-col font-sans select-none overscroll-none">

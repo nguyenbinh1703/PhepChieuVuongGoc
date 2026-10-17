@@ -9,7 +9,6 @@ import { CameraPreset, InteractionMode } from '../types/lab';
 import { LabTooltip } from './LabTooltip';
 import {
   RotateCcw,
-  Sparkles,
   Orbit,
   Move,
   ChevronDown,

@@ -100,12 +100,12 @@ const computeConvexHullInPlace = (pts: Point2D[], count: number): { hull: Point2
 
 const getSpecimenHeight = (id: SpecimenId): number => {
   switch (id) {
-    case 't_3d': return 0.28;
-    case 'cylinder_3d': return 0.42;
-    case 'trapezoid_3d': return 0.38;
-    case 'cube_3d': return 0.52;
-    case 'cuboid_3d': return 0.36;
-    case 'prism_3d': return 0.38;
+    case 't_3d': return 0.38;
+    case 'cylinder_3d': return 0.56;
+    case 'trapezoid_3d': return 0.48;
+    case 'cube_3d': return 0.72;
+    case 'cuboid_3d': return 0.50;
+    case 'prism_3d': return 0.48;
     default: return 0;
   }
 };
@@ -547,8 +547,9 @@ export const LabCanvas3D: React.FC<Props> = ({
         camera.updateMatrixWorld();
 
         // Xóa triệt để quán tính kéo pan để không bị trượt xuyên rào hoặc nảy giật
-        if ((controls as any)._panOffset) {
-          (controls as any)._panOffset.set(0, 0, 0);
+        const internalControls = controls as unknown as { _panOffset?: THREE.Vector3 };
+        if (internalControls._panOffset) {
+          internalControls._panOffset.set(0, 0, 0);
         }
       }
     };
@@ -897,16 +898,16 @@ export const LabCanvas3D: React.FC<Props> = ({
 
     const createTShape = () => {
       const shape = new THREE.Shape();
-      // Kích thước chuẩn kỹ thuật: Rộng 0.64, Cao 0.54 (tâm đặt tại 0, 0)
-      // Bán kính góc xa nhất chỉ 0.419, lọt thỏm trọn vẹn hoàn hảo bên trong cột sáng bán kính 0.75
-      shape.moveTo(-0.32, 0.27);
-      shape.lineTo(0.32, 0.27);
-      shape.lineTo(0.32, 0.11);
-      shape.lineTo(0.10, 0.11);
-      shape.lineTo(0.10, -0.27);
-      shape.lineTo(-0.10, -0.27);
-      shape.lineTo(-0.10, 0.11);
-      shape.lineTo(-0.32, 0.11);
+      // Kích thước chuẩn kỹ thuật: Rộng 0.94, Cao 0.78 (tâm đặt chính xác tại 0, 0)
+      // Bán kính góc xa nhất 0.61, chiếm ~83-85% cột sáng bán kính 0.75, cột sáng luôn bao trọn vật mẫu
+      shape.moveTo(-0.47, 0.39);
+      shape.lineTo(0.47, 0.39);
+      shape.lineTo(0.47, 0.17);
+      shape.lineTo(0.14, 0.17);
+      shape.lineTo(0.14, -0.39);
+      shape.lineTo(-0.14, -0.39);
+      shape.lineTo(-0.14, 0.17);
+      shape.lineTo(-0.47, 0.17);
       shape.closePath();
       return shape;
     };
@@ -1038,23 +1039,23 @@ export const LabCanvas3D: React.FC<Props> = ({
       return edgeGroup;
     };
 
-    // Hàm tạo hình thang chuẩn kỹ thuật: Đáy nhỏ 0.36, đáy lớn 0.64, chiều cao 0.44 (tâm 0, 0)
+    // Hàm tạo hình thang chuẩn kỹ thuật: Đáy nhỏ 0.56, đáy lớn 0.96, chiều cao 0.64 (tâm 0, 0)
     const createTrapezoidShape = () => {
       const shape = new THREE.Shape();
-      shape.moveTo(-0.18, 0.22);
-      shape.lineTo(0.18, 0.22);
-      shape.lineTo(0.32, -0.22);
-      shape.lineTo(-0.32, -0.22);
+      shape.moveTo(-0.28, 0.32);
+      shape.lineTo(0.28, 0.32);
+      shape.lineTo(0.48, -0.32);
+      shape.lineTo(-0.48, -0.32);
       shape.closePath();
       return shape;
     };
 
-    // Hàm tạo tam giác chuẩn kỹ thuật: Trọng tâm chính xác tại (0, 0)
+    // Hàm tạo tam giác chuẩn kỹ thuật: Đáy 1.04, đỉnh 0.46, trọng tâm chính xác tại (0, 0)
     const createTriangleShape = () => {
       const shape = new THREE.Shape();
-      shape.moveTo(0, 0.26);
-      shape.lineTo(0.30, -0.13);
-      shape.lineTo(-0.30, -0.13);
+      shape.moveTo(0, 0.46);
+      shape.lineTo(0.52, -0.23);
+      shape.lineTo(-0.52, -0.23);
       shape.closePath();
       return shape;
     };
@@ -1111,8 +1112,8 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(tGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'circle_2d') {
-        const cr = 0.32;
-        const circleGeo = new THREE.CircleGeometry(cr, 48);
+        const cr = 0.62;
+        const circleGeo = new THREE.CircleGeometry(cr, 64);
         const mesh = new THREE.Mesh(circleGeo, skyBlueMat);
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.set(0, boxH + 0.005, 0);
@@ -1129,7 +1130,7 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(trapGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'square_2d') {
-        const s = 0.52;
+        const s = 0.88;
         const sqGeo = new THREE.PlaneGeometry(s, s);
         const mesh = new THREE.Mesh(sqGeo, skyBlueMat);
         mesh.rotation.x = -Math.PI / 2;
@@ -1138,8 +1139,8 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(sqGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'rectangle_2d') {
-        const rw = 0.64;
-        const rh = 0.42;
+        const rw = 1.04;
+        const rh = 0.66;
         const rectGeo = new THREE.PlaneGeometry(rw, rh);
         const mesh = new THREE.Mesh(rectGeo, skyBlueMat);
         mesh.rotation.x = -Math.PI / 2;
@@ -1161,8 +1162,9 @@ export const LabCanvas3D: React.FC<Props> = ({
       // --- NHÓM HÌNH 3D (Khối nổi kỹ thuật) ---
       else if (id === 't_3d') {
         const tShape = createTShape();
+        const ch = 0.38;
         const extrudeSettings = {
-          depth: 0.28,
+          depth: ch,
           bevelEnabled: true,
           bevelSegments: 3,
           steps: 1,
@@ -1177,12 +1179,11 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(tExtrudeGeo, 24)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'cylinder_3d') {
-        // Khối hình trụ: Bán kính 0.30, Chiều cao 0.42
-        // Theo yêu cầu người dùng: KHÔNG CẦN ĐƯỜNG CAO KẺ TỪ ĐÁY TRÒN TRÊN XUỐNG ĐÁY TRÒN DƯỚI!
+        // Khối hình trụ: Bán kính 0.52, Chiều cao 0.56 (chiếm ~82% cột sáng bán kính 0.75)
         // Chỉ vẽ 2 vòng tròn viền mép trên và mép dưới
         // Nét đứt của mép dưới được phân đoạn cung tròn liên tục 96 bước đều tăm tắp, chuẩn đẹp
-        const cr = 0.30;
-        const ch = 0.42;
+        const cr = 0.52;
+        const ch = 0.56;
         const cylGeo = new THREE.CylinderGeometry(cr, cr, ch, 48);
         const mesh = new THREE.Mesh(cylGeo, skyBlueMat);
         mesh.position.set(0, boxH + 0.005 + ch / 2, 0);
@@ -1194,7 +1195,7 @@ export const LabCanvas3D: React.FC<Props> = ({
       } else if (id === 'trapezoid_3d') {
         // Khối hình thang 3D
         const trapShape = createTrapezoidShape();
-        const ch = 0.38;
+        const ch = 0.48;
         const trapExtrudeGeo = new THREE.ExtrudeGeometry(trapShape, {
           depth: ch,
           bevelEnabled: false,
@@ -1206,8 +1207,8 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(trapExtrudeGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'cube_3d') {
-        // Khối lập phương 3D: 0.52 x 0.52 x 0.52
-        const s = 0.52;
+        // Khối lập phương 3D: 0.72 x 0.72 x 0.72
+        const s = 0.72;
         const cubeGeo = new THREE.BoxGeometry(s, s, s);
         const mesh = new THREE.Mesh(cubeGeo, skyBlueMat);
         mesh.position.set(0, boxH + 0.005 + s / 2, 0);
@@ -1215,10 +1216,10 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(cubeGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'cuboid_3d') {
-        // Khối hộp chữ nhật 3D: Rộng 0.64 x Cao 0.36 x Sâu 0.42
-        const rw = 0.64;
-        const ch = 0.36;
-        const rh = 0.42;
+        // Khối hộp chữ nhật 3D: Rộng 0.92 x Cao 0.50 x Sâu 0.60
+        const rw = 0.92;
+        const ch = 0.50;
+        const rh = 0.60;
         const boxGeo = new THREE.BoxGeometry(rw, ch, rh);
         const mesh = new THREE.Mesh(boxGeo, skyBlueMat);
         mesh.position.set(0, boxH + 0.005 + ch / 2, 0);
@@ -1226,9 +1227,9 @@ export const LabCanvas3D: React.FC<Props> = ({
         mesh.add(createScientificEdges(new THREE.EdgesGeometry(boxGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'prism_3d') {
-        // Khối lăng trụ tam giác 3D: Chiều cao 0.38
+        // Khối lăng trụ tam giác 3D: Chiều cao 0.48
         const triShape = createTriangleShape();
-        const ch = 0.38;
+        const ch = 0.48;
         const prismGeo = new THREE.ExtrudeGeometry(triShape, {
           depth: ch,
           bevelEnabled: false,
@@ -1298,18 +1299,18 @@ export const LabCanvas3D: React.FC<Props> = ({
       floorCtx.fillStyle = '#000000';
 
       const drawTPath = (ox: number, oy: number) => {
-        const w = 0.64 * scale;
-        const hTop = 0.16 * scale;
-        const wStem = 0.20 * scale;
-        const hStem = 0.38 * scale;
+        const w = 0.94 * scale;
+        const hTop = 0.22 * scale;
+        const wStem = 0.28 * scale;
+        const hStem = 0.56 * scale;
         floorCtx.fillRect(ox - w / 2, oy - hTop / 2 - hStem / 2, w, hTop);
         floorCtx.fillRect(ox - wStem / 2, oy - hStem / 2 + hTop / 2, wStem, hStem);
       };
 
       const drawTrapezoidPath = (ox: number, oy: number) => {
-        const topW = 0.36 * scale;
-        const botW = 0.64 * scale;
-        const h = 0.44 * scale;
+        const topW = 0.56 * scale;
+        const botW = 0.96 * scale;
+        const h = 0.64 * scale;
         floorCtx.beginPath();
         floorCtx.moveTo(ox - topW / 2, oy - h / 2);
         floorCtx.lineTo(ox + topW / 2, oy - h / 2);
@@ -1320,9 +1321,9 @@ export const LabCanvas3D: React.FC<Props> = ({
       };
 
       const drawTrianglePath = (ox: number, oy: number) => {
-        const apexY = -0.26 * scale;
-        const baseW = 0.30 * scale;
-        const baseY = 0.13 * scale;
+        const apexY = -0.46 * scale;
+        const baseW = 0.52 * scale;
+        const baseY = 0.23 * scale;
         floorCtx.beginPath();
         floorCtx.moveTo(ox, oy + apexY);
         floorCtx.lineTo(ox + baseW, oy + baseY);
@@ -1348,37 +1349,37 @@ export const LabCanvas3D: React.FC<Props> = ({
         drawTPath(spotU, spotV);
       } else if (currentSpecimen === 'circle_2d') {
         floorCtx.beginPath();
-        floorCtx.arc(spotU, spotV, 0.32 * scale, 0, Math.PI * 2);
+        floorCtx.arc(spotU, spotV, 0.62 * scale, 0, Math.PI * 2);
         floorCtx.fill();
       } else if (currentSpecimen === 'trapezoid_2d') {
         drawTrapezoidPath(spotU, spotV);
       } else if (currentSpecimen === 'square_2d') {
-        const s = 0.52 * scale;
+        const s = 0.88 * scale;
         floorCtx.fillRect(spotU - s / 2, spotV - s / 2, s, s);
       } else if (currentSpecimen === 'rectangle_2d') {
-        const rw = 0.64 * scale;
-        const rh = 0.42 * scale;
+        const rw = 1.04 * scale;
+        const rh = 0.66 * scale;
         floorCtx.fillRect(spotU - rw / 2, spotV - rh / 2, rw, rh);
       } else if (currentSpecimen === 'triangle_2d') {
         drawTrianglePath(spotU, spotV);
       }
       // 2. Nhóm Hình 3D Khối (Hình chiếu song song chuẩn xác tuyệt đối qua Convex Hull 3D)
       else if (currentSpecimen === 't_3d') {
-        const ch = 0.28;
+        const ch = 0.38;
         const halfShift = (ch / 2) * cotAlpha * scale;
         const uBot = spotU + halfShift;
         const uTop = spotU - halfShift;
         const minU = Math.min(uBot, uTop);
         const shiftSpan = Math.abs(uTop - uBot);
-        const w = 0.64 * scale;
-        const hTop = 0.16 * scale;
-        const wStem = 0.20 * scale;
-        const hStem = 0.38 * scale;
+        const w = 0.94 * scale;
+        const hTop = 0.22 * scale;
+        const wStem = 0.28 * scale;
+        const hStem = 0.56 * scale;
         floorCtx.fillRect(minU - w / 2, spotV - hTop / 2 - hStem / 2, w + shiftSpan, hTop);
         floorCtx.fillRect(minU - wStem / 2, spotV - hStem / 2 + hTop / 2, wStem + shiftSpan, hStem);
       } else if (currentSpecimen === 'cylinder_3d') {
-        const r = 0.30 * scale;
-        const ch = 0.42;
+        const r = 0.52 * scale;
+        const ch = 0.56;
         const halfShift = (ch / 2) * cotAlpha * scale;
         const uBot = spotU + halfShift;
         const uTop = spotU - halfShift;
@@ -1390,13 +1391,13 @@ export const LabCanvas3D: React.FC<Props> = ({
         floorCtx.closePath();
         floorCtx.fill();
       } else if (currentSpecimen === 'trapezoid_3d') {
-        const ch = 0.38;
+        const ch = 0.48;
         const halfH = ch / 2;
         const trapVerts = [
-          { x: -0.18, z: -0.22 },
-          { x: 0.18, z: -0.22 },
-          { x: 0.32, z: 0.22 },
-          { x: -0.32, z: 0.22 },
+          { x: -0.28, z: -0.32 },
+          { x: 0.28, z: -0.32 },
+          { x: 0.48, z: 0.32 },
+          { x: -0.48, z: 0.32 },
         ];
         let pIdx = 0;
         for (const v of trapVerts) {
@@ -1408,7 +1409,7 @@ export const LabCanvas3D: React.FC<Props> = ({
         }
         drawHullFromPool(pIdx);
       } else if (currentSpecimen === 'cube_3d') {
-        const s = 0.52;
+        const s = 0.72;
         const halfS = s / 2;
         let pIdx = 0;
         for (const dx of [-halfS, halfS]) {
@@ -1422,9 +1423,9 @@ export const LabCanvas3D: React.FC<Props> = ({
         }
         drawHullFromPool(pIdx);
       } else if (currentSpecimen === 'cuboid_3d') {
-        const rw = 0.64;
-        const ch = 0.36;
-        const rh = 0.42;
+        const rw = 0.92;
+        const ch = 0.50;
+        const rh = 0.60;
         const halfW = rw / 2;
         const halfD = rh / 2;
         const halfH = ch / 2;
@@ -1440,12 +1441,12 @@ export const LabCanvas3D: React.FC<Props> = ({
         }
         drawHullFromPool(pIdx);
       } else if (currentSpecimen === 'prism_3d') {
-        const ch = 0.38;
+        const ch = 0.48;
         const halfH = ch / 2;
         const triVerts = [
-          { x: 0, z: -0.26 },
-          { x: 0.30, z: 0.13 },
-          { x: -0.30, z: 0.13 },
+          { x: 0, z: -0.46 },
+          { x: 0.52, z: 0.23 },
+          { x: -0.52, z: 0.23 },
         ];
         let pIdx = 0;
         for (const v of triVerts) {

@@ -49,11 +49,11 @@ export class LabErrorBoundary extends Component<Props, State> {
             </div>
 
             <h2 className="text-lg font-bold text-slate-800 tracking-tight mb-2">
-              Phòng thí nghiệm 3D gặp sự cố
+              Mô hình thí nghiệm gặp sự cố
             </h2>
 
             <p className="text-sm text-slate-600 leading-relaxed mb-4">
-              Không thể khởi tạo hoặc tiếp tục dựng hình 3D. Điều này thường xảy ra khi card đồ họa (GPU) bị tạm dừng, hoặc trình duyệt chưa bật{' '}
+              Không thể khởi tạo hoặc tiếp tục thí nghiệm. Điều này thường xảy ra khi card đồ họa (GPU) bị tạm dừng, hoặc trình duyệt chưa bật{' '}
               <strong className="text-slate-800">Tăng tốc phần cứng (Hardware Acceleration)</strong>.
             </p>
 

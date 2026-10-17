@@ -39,7 +39,7 @@ interface SpecimenOption {
 const SPECIMENS_2D: SpecimenOption[] = [
   {
     id: 't_2d',
-    label: 'Chữ T',
+    label: 'Hình chữ T',
     icon: (active) => (
       <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
         <path
@@ -112,7 +112,7 @@ const SPECIMENS_2D: SpecimenOption[] = [
   },
   {
     id: 'triangle_2d',
-    label: 'Tam giác',
+    label: 'Hình tam giác',
     icon: (active) => (
       <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
         <polygon
@@ -129,7 +129,7 @@ const SPECIMENS_2D: SpecimenOption[] = [
 const SPECIMENS_3D: SpecimenOption[] = [
   {
     id: 't_3d',
-    label: 'Khối T',
+    label: 'Khối hình chữ T',
     icon: (active) => (
       <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none">
         {/* Mặt trên thanh ngang T */}
@@ -574,17 +574,17 @@ export const LabControlDock: React.FC<Props> = ({
   const handleToggleLampVisibility = () => {
     labAudio.playClick();
     if (isLampVisible) {
-      // Khi đèn pin ẩn -> ánh sáng đèn tự động tắt ngay, âm thanh hum dừng
+      // Khi đèn laser ẩn -> ánh sáng đèn tự động tắt ngay, âm thanh hum dừng
       labAudio.updateLaserHum(false, laser.intensity);
       onUpdateLaser({ isVisible: false, isOn: false });
     } else {
-      // Khi hiện lại đèn pin -> chỉ hiện thân đèn, đèn vẫn ở trạng thái tắt cho đến khi người dùng bấm BẬT
+      // Khi hiện lại đèn laser -> chỉ hiện thân đèn, đèn vẫn ở trạng thái tắt cho đến khi người dùng bấm BẬT
       onUpdateLaser({ isVisible: true });
     }
   };
 
   const handleTogglePower = () => {
-    if (!isLampVisible) return; // Vô hiệu hoá hoàn toàn khi đèn pin đang ẩn
+    if (!isLampVisible) return; // Vô hiệu hoá hoàn toàn khi đèn laser đang ẩn
     const newState = !laser.isOn;
     labAudio.playSwitch(newState);
     labAudio.updateLaserHum(newState, laser.intensity);
@@ -722,7 +722,7 @@ export const LabControlDock: React.FC<Props> = ({
 
           {/* TẦNG 2: Đèn, Hộp, Bật/tắt, Hình 2D, Hình 3D */}
           <div className="flex items-center gap-1.5 sm:gap-2 w-full overflow-visible">
-            {/* Nút 1: Ẩn/Hiện Đèn pin */}
+            {/* Nút 1: Ẩn/Hiện Đèn laser */}
             <LabTooltip shortcut="(L)" position="top">
               <button
                 type="button"
@@ -732,7 +732,7 @@ export const LabControlDock: React.FC<Props> = ({
                     ? 'bg-sky-50 hover:bg-sky-100 text-sky-600 border-sky-200 ring-2 ring-sky-100/80 active:scale-95'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border-slate-300/80 active:scale-95'
                 }`}
-                title={isLampVisible ? 'Ẩn đèn pin' : 'Hiện đèn pin'}
+                title={isLampVisible ? 'Ẩn đèn laser' : 'Hiện đèn laser'}
               >
                 {isLampVisible ? (
                   <Flashlight className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-sky-600" />
