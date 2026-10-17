@@ -1165,18 +1165,14 @@ export const LabCanvas3D: React.FC<Props> = ({
         const ch = 0.38;
         const extrudeSettings = {
           depth: ch,
-          bevelEnabled: true,
-          bevelSegments: 3,
-          steps: 1,
-          bevelSize: 0.01,
-          bevelThickness: 0.01,
+          bevelEnabled: false,
         };
         const tExtrudeGeo = new THREE.ExtrudeGeometry(tShape, extrudeSettings);
         const mesh = new THREE.Mesh(tExtrudeGeo, skyBlueMat);
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.set(0, boxH + 0.005, 0);
         mesh.renderOrder = 3;
-        mesh.add(createScientificEdges(new THREE.EdgesGeometry(tExtrudeGeo, 24)));
+        mesh.add(createScientificEdges(new THREE.EdgesGeometry(tExtrudeGeo)));
         specimenMeshGroup.add(mesh);
       } else if (id === 'cylinder_3d') {
         // Khối hình trụ: Bán kính 0.52, Chiều cao 0.56 (chiếm ~82% cột sáng bán kính 0.75)
