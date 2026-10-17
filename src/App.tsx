@@ -351,19 +351,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [laser.isVisible, laser.isOn, laser.intensity]);
 
-  // Tự động tạm dừng âm thanh máy phát laser khi ẩn tab trình duyệt và tiếp tục khi quay lại
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        labAudio.updateLaserHum(false, laser.intensity);
-      } else if (laser.isOn && laser.isVisible !== false) {
-        labAudio.updateLaserHum(true, laser.intensity);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [laser.isOn, laser.isVisible, laser.intensity]);
 
   // Hệ thống Bảo Mật Lớp 2: Chặn menu ngữ cảnh chuột phải và kéo thả tài nguyên
   useEffect(() => {
